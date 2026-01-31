@@ -38,7 +38,7 @@ func Connect() error {
 
 	//String de conexão
 	connStr := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s", host, port, user, password, dbname,
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname,
 	)
 
 	//Conexão
