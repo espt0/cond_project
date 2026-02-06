@@ -1,8 +1,4 @@
--- ========================================
 -- SCHEMA POSTGRESQL - SISTEMA DE CONDOMÍNIOS
--- Versão Simplificada para Primeiro Projeto Fullstack
--- ========================================
-
 -- ========================================
 -- MÓDULO: ESTRUTURA DO CONDOMÍNIO
 -- ========================================
@@ -19,7 +15,7 @@ CREATE TABLE condominios (
     telefone VARCHAR(20),
     email VARCHAR(100),
     data_fundacao DATE,
-    sindico_id INTEGER, -- Será referenciado depois que a tabela pessoas existir
+    sindico_id INTEGER, -- FK será adicionada depois que a tabela pessoas existir
     ativo BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -84,7 +80,7 @@ CREATE TABLE pessoas (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-COMMENT ON TABLE pessoas IS 'Cadastro geral de pessoas (proprietários, inquilinos, moradores)';
+COMMENT ON TABLE pessoas IS 'Cadastro geral de pessoas (proprietários, inquilinos, moradores, fornecedores)';
 COMMENT ON COLUMN pessoas.cpf IS 'CPF no formato 000.000.000-00';
 
 -- Índices para buscas frequentes
@@ -129,6 +125,15 @@ COMMENT ON COLUMN usuarios.tipo IS 'Tipo de usuário: admin, sindico, morador ou
 
 -- Índice para login
 CREATE INDEX idx_usuarios_username ON usuarios(username) WHERE ativo = TRUE;
+
+-- ========================================
+-- FOREIGN KEY ADICIONAL
+-- ========================================
+
+-- Agora que a tabela pessoas existe, podemos adicionar a FK do síndico
+ALTER TABLE condominios 
+ADD CONSTRAINT fk_condominios_sindico 
+FOREIGN KEY (sindico_id) REFERENCES pessoas(id) ON DELETE SET NULL;
 
 -- ========================================
 -- MÓDULO: FINANCEIRO
@@ -182,7 +187,7 @@ CREATE TABLE contas_pagar (
     id SERIAL PRIMARY KEY,
     condominio_id INTEGER NOT NULL REFERENCES condominios(id) ON DELETE CASCADE,
     categoria_id INTEGER REFERENCES categorias_financeiras(id) ON DELETE SET NULL,
-    fornecedor_id INTEGER, -- Pode referenciar pessoas jurídicas
+    fornecedor_id INTEGER REFERENCES pessoas(id) ON DELETE SET NULL,
     descricao TEXT NOT NULL,
     valor DECIMAL(10,2) NOT NULL,
     data_vencimento DATE NOT NULL,
@@ -194,6 +199,7 @@ CREATE TABLE contas_pagar (
 );
 
 COMMENT ON TABLE contas_pagar IS 'Despesas e contas a pagar do condomínio';
+COMMENT ON COLUMN contas_pagar.fornecedor_id IS 'Referência a fornecedores cadastrados na tabela pessoas';
 COMMENT ON COLUMN contas_pagar.forma_pagamento IS 'Ex: PIX, TED, Boleto, Dinheiro';
 
 -- Índices para gestão de despesas
@@ -357,17 +363,6 @@ COMMENT ON TABLE veiculos IS 'Cadastro de veículos dos moradores';
 COMMENT ON COLUMN veiculos.tipo IS 'Tipo: carro, moto ou caminhao';
 
 -- ========================================
--- FOREIGN KEY ADICIONAL
--- ========================================
-
--- Agora que a tabela pessoas existe, podemos adicionar a FK do síndico
-ALTER TABLE condominios 
-ADD CONSTRAINT fk_condominios_sindico 
-FOREIGN KEY (sindico_id) REFERENCES pessoas(id) ON DELETE SET NULL;
-
-COMMENT ON COLUMN condominios.sindico_id IS 'Referência ao síndico atual (tabela pessoas)';
-
--- ========================================
 -- TRIGGERS E FUNÇÕES
 -- ========================================
 
@@ -391,8 +386,8 @@ CREATE TRIGGER trigger_pessoas_updated_at
     FOR EACH ROW 
     EXECUTE FUNCTION atualizar_updated_at();
 
--- Função para calcular automaticamente o status de contas a receber
-CREATE OR REPLACE FUNCTION atualizar_status_conta_receber()
+-- Função para calcular automaticamente o status de contas financeiras
+CREATE OR REPLACE FUNCTION atualizar_status_financeiro()
 RETURNS TRIGGER AS $$
 BEGIN
     -- Se foi pago, marca como pago
@@ -410,16 +405,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Aplicar trigger em contas a receber
 CREATE TRIGGER trigger_status_conta_receber 
     BEFORE INSERT OR UPDATE ON contas_receber
     FOR EACH ROW 
-    EXECUTE FUNCTION atualizar_status_conta_receber();
+    EXECUTE FUNCTION atualizar_status_financeiro();
 
--- O mesmo para contas a pagar
+-- Aplicar trigger em contas a pagar
 CREATE TRIGGER trigger_status_conta_pagar 
     BEFORE INSERT OR UPDATE ON contas_pagar
     FOR EACH ROW 
-    EXECUTE FUNCTION atualizar_status_conta_receber();
+    EXECUTE FUNCTION atualizar_status_financeiro();
 
 -- ========================================
 -- VIEWS ÚTEIS
@@ -492,5 +488,3 @@ FROM information_schema.tables
 WHERE table_schema = 'public' 
 AND table_type = 'BASE TABLE'
 ORDER BY table_name;
-
--- Pronto! O schema está completo e pronto para uso.

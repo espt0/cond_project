@@ -20,22 +20,6 @@ func Connect() error {
 	password := os.Getenv("DB_PASSWORD")
 	dbname := os.Getenv("DB_DBNAME")
 
-	if host == "" {
-		host = "localhost"
-	}
-	if port == "" {
-		port = "5432"
-	}
-	if user == "" {
-		user = "postgres"
-	}
-	if dbname == "" {
-		dbname = "conddb"
-	}
-	if password == "" {
-		password = "1234"
-	}
-
 	//String de conexão
 	connStr := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname,
