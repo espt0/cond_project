@@ -5,12 +5,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-//Criar, Ler, Atualizar, Excluir (CRUD)
-
-func Rotas(e *echo.Echo) {
+// Criar, Ler, Atualizar, Excluir (CRUD)
+func Rotas(e *echo.Echo, condHandler *handlers.CondominiumHandler) {
 	//Rotas das estruturas físicas
 	condominios := e.Group("/condominios")
-	condominios.GET("", handlers.ListCondominios) //Lista todos (ADM)
+	condominios.GET("", condHandler.ListCondominios) //Lista todos (ADM)
 
 	condominios.POST("", handlers.CreateCondominio)       //Cria um condomínio
 	condominios.GET("/:id", handlers.GetCondominio)       //Detalhes de um condomínio

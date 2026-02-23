@@ -12,7 +12,7 @@ import (
 
 var DB *sqlx.DB
 
-func Connect() error {
+func Connect() (*sqlx.DB, error) {
 	//Variáveis de ambiente
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
@@ -29,7 +29,7 @@ func Connect() error {
 	var err error
 	DB, err = sqlx.Connect("postgres", connStr)
 	if err != nil {
-		return fmt.Errorf("erro ao conetar no banco de dados: %w", err)
+		return nil, fmt.Errorf("erro ao conetar no banco de dados: %w", err)
 	}
 
 	//Configuração do pool
@@ -38,7 +38,7 @@ func Connect() error {
 	DB.SetConnMaxLifetime(5 * time.Minute)
 
 	log.Println("Conexão com o banco de dados (sqlx) estabelecida com sucesso!")
-	return nil
+	return DB, nil
 }
 
 // Fechando conexão
@@ -48,9 +48,4 @@ func Close() error {
 		return DB.Close()
 	}
 	return nil
-}
-
-// Instância da conexão
-func GetDB() *sqlx.DB {
-	return DB
 }

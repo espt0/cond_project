@@ -10,16 +10,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func PrintText(c echo.Context) error {
+type CondominiumHandler struct {
+	repo *repositories.PostgresqlRepository
+}
 
-	return c.String(200, "Teste")
-
+func NewCondominiumHandler(repo *repositories.PostgresqlRepository) *CondominiumHandler {
+	return &CondominiumHandler{repo: repo}
 }
 
 // CONDOMÍNIO
-func ListCondominios(c echo.Context) error {
+func (h *CondominiumHandler) ListCondominios(c echo.Context) error {
 
-	lista, err := repositories.TodosCond()
+	lista, err := h.repo.FindAll()
 	if err != nil {
 		return fmt.Errorf("Erro ao listar: %w", err)
 	}
