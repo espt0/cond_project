@@ -7,6 +7,8 @@ import (
 	"github.com/espt0/cond_project/internal/handlers"
 	"github.com/espt0/cond_project/internal/repositories"
 	"github.com/espt0/cond_project/internal/routes"
+	"github.com/espt0/cond_project/internal/services"
+	"github.com/espt0/cond_project/internal/validator"
 
 	"github.com/labstack/echo/v4"
 )
@@ -22,9 +24,14 @@ func main() {
 	//Inicializando instância
 	e := echo.New()
 
-	Repo := repositories.NewPostgresqlRepository(db)
-	condHandler := handlers.NewCondominiumHandler(Repo)
-	routes.Rotas(e, condHandler)
+	//Valiação
+	e.Validator = validator.New()
+
+	//???
+	repo := repositories.NewPostgresqlRepository(db)
+	service := services.NewCondominiumService(repo)
+	Handler := handlers.NewCondominiumHandler(service)
+	routes.Rotas(e, Handler)
 
 	//Inicializando o server
 	e.Logger.Fatal(e.Start(":8080"))

@@ -4,32 +4,33 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/espt0/cond_project/internal/models"
-	"github.com/espt0/cond_project/internal/repositories"
+	"github.com/espt0/cond_project/internal/dto"
+	"github.com/espt0/cond_project/internal/services"
 
 	"github.com/labstack/echo/v4"
 )
 
 type CondominiumHandler struct {
-	repo *repositories.PostgresqlRepository
+	service *services.CondominiumService
 }
 
-func NewCondominiumHandler(repo *repositories.PostgresqlRepository) *CondominiumHandler {
-	return &CondominiumHandler{repo: repo}
+func NewCondominiumHandler(service *services.CondominiumService) *CondominiumHandler {
+	return &CondominiumHandler{service: service}
 }
 
-// CONDOMÍNIO
 func (h *CondominiumHandler) ListCondominios(c echo.Context) error {
+	ctx := c.Request().Context()
 
-	lista, err := h.repo.FindAll()
+	lista, err := h.service.ListCondominiums(ctx)
 	if err != nil {
 		return fmt.Errorf("Erro ao listar: %w", err)
 	}
 
 	return c.JSON(200, lista)
 }
-func CreateCondominio(c echo.Context) error {
-	var req models.Condominium
+func (h *CondominiumHandler) CreateCondominio(c echo.Context) error {
+	ctx := c.Request().Context()
+	var req dto.CreateCondominiumInput
 
 	//Conversão de JSON -> Struct
 	if err := c.Bind(&req); err != nil {
@@ -37,23 +38,17 @@ func CreateCondominio(c echo.Context) error {
 	}
 
 	//Validação
-	if req.Name == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"erro": "nome é obrigatório"})
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
 	}
 
-	return c.String(200, "Criando condomínio")
-}
-func GetCondominio(c echo.Context) error {
+	//Chamar o Service
+	err := h.service.CreateCondominium(ctx, &req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"erro": "erro ao criar condomínio",
+		})
+	}
 
-	return c.String(200, "Informação sobre um condomínio")
+	return c.JSON(http.StatusCreated, "Condomínio criado")
 }
-func UpdateCondominio(c echo.Context) error {
-
-	return c.String(200, "Atualizando um condomínio")
-}
-func DeleteCondominio(c echo.Context) error {
-
-	return c.String(200, "Desativando um condomínio")
-}
-
-// BLOCOS

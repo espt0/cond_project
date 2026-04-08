@@ -18,8 +18,8 @@ func NewPostgresqlRepository(db *sqlx.DB) *PostgresqlRepository {
 	return &PostgresqlRepository{db: db}
 }
 
-// /MÉTODOS
-func (c *PostgresqlRepository) FindAll() ([]models.Condominium, error) {
+// MÉTODOS
+func (c *PostgresqlRepository) FindAll(ctx context.Context) ([]models.Condominium, error) {
 	condominios := make([]models.Condominium, 0)
 
 	query := "SELECT * FROM condominios"
@@ -30,6 +30,7 @@ func (c *PostgresqlRepository) FindAll() ([]models.Condominium, error) {
 
 	return condominios, nil
 }
+
 func (c *PostgresqlRepository) Create(ctx context.Context, cond *models.Condominium) error {
 	query := `INSERT INTO condominios (nome, cnpj, endereco, cep, cidade, estado, telefone, email, data_fundacao, sindico_id, ativo, created_at, updated_at)
 	VALUES (:nome, :cnpj, :endereco, :cep, :cidade, :estado, :telefone, :email, :data_fundacao, :sindico_id, :ativo, :created_at, :updated_at)

@@ -11,9 +11,9 @@ func Rotas(e *echo.Echo, condHandler *handlers.CondominiumHandler) {
 	condominios := e.Group("/condominios")
 	condominios.GET("", condHandler.ListCondominios) //Lista todos (ADM)
 
-	condominios.POST("", handlers.CreateCondominio)       //Cria um condomínio
-	condominios.GET("/:id", handlers.GetCondominio)       //Detalhes de um condomínio
-	condominios.PUT("/:id", handlers.UpdateCondominio)    //Atualiza
-	condominios.DELETE("/:id", handlers.DeleteCondominio) //Desativa
+	condominios.POST("", condHandler.CreateCondominio) //Cria um condomínio
+	//condominios.GET("/:id", handlers.GetCondominio)       //Detalhes de um condomínio
+	//condominios.PUT("/:id", handlers.UpdateCondominio)    //Atualiza
+	//condominios.DELETE("/:id", handlers.DeleteCondominio) //Desativa
 
 }
