@@ -10,7 +10,7 @@ import (
 	"github.com/espt0/cond_project/internal/services"
 	"github.com/espt0/cond_project/internal/validator"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 func main() {
@@ -25,14 +25,16 @@ func main() {
 	e := echo.New()
 
 	//Valiação
-	e.Validator = validator.New()
+	e.Validator = validator.NewEchoValidator()
 
-	//???
+	//Injeção de dependencias
 	repo := repositories.NewPostgresqlRepository(db)
 	service := services.NewCondominiumService(repo)
-	Handler := handlers.NewCondominiumHandler(service)
-	routes.Rotas(e, Handler)
+	handler := handlers.NewCondominiumHandler(service)
+	routes.Rotas(e, handler)
 
 	//Inicializando o server
-	e.Logger.Fatal(e.Start(":8080"))
+	if err := e.Start(":8080"); err != nil {
+		log.Fatal("Erro ao iniciar servidor:", err)
+	}
 }

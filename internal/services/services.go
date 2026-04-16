@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/espt0/cond_project/internal/dto"
+	_ "github.com/espt0/cond_project/internal/dto"
 	"github.com/espt0/cond_project/internal/models"
 	"github.com/espt0/cond_project/internal/repositories"
 )
@@ -15,6 +15,7 @@ type CondominiumRepository interface {
 	Create(ctx context.Context, cond *models.Condominium) error
 	Update(ctx context.Context, cond *models.Condominium) error
 	Delete(ctx context.Context, id int) error
+	ExistsByName(ctx context.Context, nome string) (bool, error)
 }
 
 type CondominiumService struct {
@@ -44,6 +45,4 @@ func (s *CondominiumService) ListCondominiums(ctx context.Context) ([]models.Con
 	return condAtivos, nil
 }
 
-func (s *CondominiumService) CreateCondominium(ctx context.Context, cond *dto.CreateCondominiumInput) error {
-
-}
+//func (s *CondominiumService) CreateCondominium(ctx context.Context, cond *dto.CreateCondominiumInput) error {

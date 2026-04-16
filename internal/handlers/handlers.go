@@ -7,7 +7,7 @@ import (
 	"github.com/espt0/cond_project/internal/dto"
 	"github.com/espt0/cond_project/internal/services"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type CondominiumHandler struct {
@@ -18,7 +18,7 @@ func NewCondominiumHandler(service *services.CondominiumService) *CondominiumHan
 	return &CondominiumHandler{service: service}
 }
 
-func (h *CondominiumHandler) ListCondominios(c echo.Context) error {
+func (h *CondominiumHandler) ListCondominios(c *echo.Context) error {
 	ctx := c.Request().Context()
 
 	lista, err := h.service.ListCondominiums(ctx)
@@ -28,7 +28,7 @@ func (h *CondominiumHandler) ListCondominios(c echo.Context) error {
 
 	return c.JSON(200, lista)
 }
-func (h *CondominiumHandler) CreateCondominio(c echo.Context) error {
+func (h *CondominiumHandler) CreateCondominium(c *echo.Context) error {
 	ctx := c.Request().Context()
 	var req dto.CreateCondominiumInput
 
@@ -45,10 +45,10 @@ func (h *CondominiumHandler) CreateCondominio(c echo.Context) error {
 	//Chamar o Service
 	err := h.service.CreateCondominium(ctx, &req)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"erro": "erro ao criar condomínio",
 		})
 	}
 
-	return c.JSON(http.StatusCreated, "Condomínio criado")
+	return c.JSON(http.StatusCreated, map[string]string{"mensagem": "Condomínio criado com sucesso"})
 }

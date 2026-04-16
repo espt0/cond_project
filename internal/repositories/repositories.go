@@ -59,3 +59,13 @@ func (c *PostgresqlRepository) Create(ctx context.Context, cond *models.Condomin
 
 	return rows.Err()
 }
+
+func (c *PostgresqlRepository) ExistsByName(ctx context.Context, nome string) (bool, error) {
+	var exists bool
+
+	query := "SELECT EXISTS(SELECT 1 FROM condominios WHERE nome = $1)"
+
+	err := c.db.GetContext(ctx, &exists, query, nome)
+
+	return exists, err
+}
